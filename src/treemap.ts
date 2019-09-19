@@ -58,6 +58,8 @@ export interface Options {
   caption?(node: Node): string;
   showNode(node: Node, width: number, height: number): boolean;
   showChildren(node: Node, width: number, height: number): boolean;
+  className?(node:Node) : string;
+  style?(node:Node):string;
 }
 
 /**
@@ -103,6 +105,8 @@ function defaultOptions(options: Partial<Options>): Options {
   const opts = {
     padding: options.padding || [14, 3, 3, 3],
     caption: options.caption || ((node: Node) => node.id || ''),
+    className: options.className || ((node:Node) => ''),
+    style: options.style || ( ((node:Node) => '') ),
     showNode:
       options.showNode ||
       ((node: Node, width: number, height: number): boolean => {
@@ -127,7 +131,10 @@ export class TreeMap {
   ensureDOM(node: Node): HTMLElement {
     if (node.dom) return node.dom;
     const dom = document.createElement('div');
-    dom.className = NODE_CSS_CLASS;
+    const optClassName = this.options.className && this.options.className(node);
+    const optStyle = this.options.style && this.options.style(node);
+    dom.className = NODE_CSS_CLASS + ` ${optClassName || ''}`;
+    dom.style.cssText = optStyle || '';
     if (this.options.caption) {
       const caption = document.createElement('div');
       caption.className = CSS_PREFIX + 'caption';
